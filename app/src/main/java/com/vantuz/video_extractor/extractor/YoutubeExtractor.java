@@ -1,5 +1,9 @@
 package com.vantuz.video_extractor.extractor;
 
+import com.vantuz.video_extractor.R;
+import com.vantuz.video_extractor.model.StreamEntry;
+import com.vantuz.video_extractor.model.VideoInfo;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -16,20 +20,20 @@ public class YoutubeExtractor implements Extractor {
     }
 
     @Override
-    public StreamEntry[] extractStreams(String url) throws Exception {
+    public VideoInfo extractStreams(String url) throws Exception {
         String videoId = null;
         try {
             videoId = getFirstGroupFromRegexp(
                     "http[s]?://(?:www\\.|m\\.)?youtube\\.com/watch\\?[a-zA-Z0-9&%+\\-_=]*v=([a-zA-Z0-9\\-_]*)", url);
         } catch (IllegalStateException e) {
-            throw new CantExtractException("Bad url", url);
+            throw new CantExtractException("Bad url", url, R.string.bad_url_text);
         }
         String all = getStringByUrl("http://www.youtube.com/get_video_info?video_id=" + videoId);
-        String stream_map = null;
+        String stream_map;
         try {
             stream_map = getFirstGroupFromRegexp("url_encoded_fmt_stream_map=([^&]*)", all);
         } catch (IllegalStateException e) {
-            throw new CantExtractException("Video is not embeddable", url);
+            throw new CantExtractException("Video is not embeddable", url, R.string.video_not_embeddable_text);
         }
         String[] tokens = URLDecoder.decode(stream_map,"utf-8").split(",");
         StreamEntry[] res = new StreamEntry[tokens.length];
@@ -40,7 +44,7 @@ public class YoutubeExtractor implements Extractor {
             String quality = getFirstGroupFromRegexp("quality=([a-z0-9]*)", tokens[i]);
             res[i] = new StreamEntry(quality + " (" + type + ")", streamUrl);
         }
-        return res;
+        return new VideoInfo(res);
     }
 
     private String getStringByUrl(String urlString) throws IOException{

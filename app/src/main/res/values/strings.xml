@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Video Extractor</string>
+    <string name="IOException_text">Connection error</string>
+    <string name="bad_url_text">Bad url</string>
+    <string name="video_not_embeddable_text">Video is not embeddable.</string>
+    <string name="domain_not_supported_text">Domain not supported</string>
 </resources>

@@ -4,10 +4,17 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView" android:layout_gravity="center_horizontal" android:src="@drawable/ochen_zhal"
+            android:baselineAlignBottom="false" android:cropToPadding="false"
+            android:scaleType="centerInside" android:adjustViewBounds="true"/>
     <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Small Text"
-            android:id="@+id/textViewError"/>
+            android:id="@+id/textViewError" style="@android:style/TextAppearance.Medium"
+            android:layout_gravity="center_horizontal"/>
 </LinearLayout>

@@ -1,10 +1,8 @@
-package com.vantuz.video_extractor.extractor;
+package com.vantuz.video_extractor.model;
 
 public class StreamEntry {
     public final String quality;
     public final String url;
-
-//    public StreamEntry() { }
 
     public StreamEntry(String quality, String url) {
         this.quality = quality;

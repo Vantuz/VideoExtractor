@@ -1,5 +1,9 @@
 package com.vantuz.video_extractor.extractor;
 
+import com.vantuz.video_extractor.R;
+import com.vantuz.video_extractor.model.StreamEntry;
+import com.vantuz.video_extractor.model.VideoInfo;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,14 +21,14 @@ public class VkExtractor implements Extractor {
     }
 
     @Override
-    public StreamEntry[] extractStreams(String url) throws Exception {
+    public VideoInfo extractStreams(String url) throws Exception {
         String html = getStringByUrl(url);
         List<StreamEntry> res = new ArrayList<StreamEntry>();
         extractVkHosted(html, res);
         if (res.size() > 0) {
-            return res.toArray(new StreamEntry[res.size()]);
+            return new VideoInfo(res.toArray(new StreamEntry[res.size()]));
         } else {
-            throw new CantExtractException("No streams found", url);
+            throw new CantExtractException("Bad url", url, R.string.bad_url_text);
         }
     }
 
