@@ -6,30 +6,39 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import java.io.File;
-public class HistoryDBSQLiteOpenHelper extends SQLiteOpenHelper {
+public class MyDBSQLiteOpenHelper extends SQLiteOpenHelper {
     private static final String DB_FILE_NAME = "history.db";
     private static final int DB_VERSION_1 = 1;
-    private static volatile HistoryDBSQLiteOpenHelper instance;
+    private static volatile MyDBSQLiteOpenHelper instance;
     private final Context context;
 
     public static final String TABLE_HISTORY = "history";
-    public static final String URL = "url";
+    public static final String URL_HISTORY = "url";
+
+    public static final String TABLE_FAVORITES = "favorites";
+    public static final String URL_FAVORITES = "_id";
 
     private static final String CREATE_TABLE_HISTORY = "CREATE TABLE " + TABLE_HISTORY
             + " ("
-            + URL + " TEXT"
+            + "_id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + URL_HISTORY + " TEXT"
             + " )";
 
-    public HistoryDBSQLiteOpenHelper(Context context) {
+    private static final String CREATE_TABLE_FAVORITES = "CREATE TABLE " + TABLE_FAVORITES
+            + " ("
+            + URL_FAVORITES + " TEXT PRIMARY KEY"
+            + " )";
+
+    public MyDBSQLiteOpenHelper(Context context) {
         super(context, DB_FILE_NAME, null, DB_VERSION_1);
         this.context = context.getApplicationContext();
     }
 
-    public static HistoryDBSQLiteOpenHelper getInstance(Context context) {
+    public static MyDBSQLiteOpenHelper getInstance(Context context) {
         if (instance == null) {
-            synchronized (HistoryDBSQLiteOpenHelper.class) {
+            synchronized (MyDBSQLiteOpenHelper.class) {
                 if (instance == null) {
-                    instance = new HistoryDBSQLiteOpenHelper(context);
+                    instance = new MyDBSQLiteOpenHelper(context);
                 }
             }
         }
@@ -40,6 +49,7 @@ public class HistoryDBSQLiteOpenHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         Log.d(LOG_TAG, "onCreate: " + CREATE_TABLE_HISTORY);
         db.execSQL(CREATE_TABLE_HISTORY);
+        db.execSQL(CREATE_TABLE_FAVORITES);
     }
 
     @Override

@@ -22,4 +22,10 @@
             android:text="@string/button_clear_history"
             android:id="@+id/buttonClearHistory" android:layout_gravity="center_horizontal" android:layout_marginTop="10dp"
     />
+    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/button_favourites" android:id="@+id/buttonFavourites"
+            android:layout_gravity="center_horizontal" android:layout_marginTop="10dp"/>
+    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/button_clear_favourites" android:id="@+id/buttonClearFavourites"
+            android:layout_gravity="center_horizontal" android:layout_marginTop="10dp"/>
 </LinearLayout>

@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.vantuz.video_extractor.db.MyDBSQLiteOpenHelper;
 
-public class HistoryActivity extends Activity {
+public class FavouritesActivity extends Activity {
     private RecyclerView mRecyclerView;
     private CursorRecyclerViewAdapter<ViewHolder> mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -42,23 +42,23 @@ public class HistoryActivity extends Activity {
 
         cursor = MyDBSQLiteOpenHelper.getInstance(this)
                 .getReadableDatabase()
-                .query(MyDBSQLiteOpenHelper.TABLE_HISTORY, null, null, null, null, null, null);
+                .query(MyDBSQLiteOpenHelper.TABLE_FAVORITES, null, null, null, null, null, null);
         mAdapter = new CursorRecyclerViewAdapter<ViewHolder>(this, cursor) {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, Cursor cursor) {
-                viewHolder.mTextView.setText(cursor.getString(1));
+                viewHolder.mTextView.setText(cursor.getString(0));
             }
 
             @Override
             public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-                View view = LayoutInflater.from(HistoryActivity.this).inflate(R.layout.list_item, viewGroup, false);
+                View view = LayoutInflater.from(FavouritesActivity.this).inflate(R.layout.list_item, viewGroup, false);
                 view.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_SEND);
+                        intent.setClass(FavouritesActivity.this, StreamChooserActivity.class);
                         intent.putExtra(Intent.EXTRA_TEXT, ((TextView) v).getText());
-                        intent.setClass(HistoryActivity.this, StreamChooserActivity.class);
+                        intent.setAction(Intent.ACTION_SEND);
                         startActivity(intent);
                     }
                 });
@@ -74,7 +74,7 @@ public class HistoryActivity extends Activity {
         super.onRestart();
         cursor = MyDBSQLiteOpenHelper.getInstance(this)
                 .getReadableDatabase()
-                .query(MyDBSQLiteOpenHelper.TABLE_HISTORY, null, null, null, null, null, null);
+                .query(MyDBSQLiteOpenHelper.TABLE_FAVORITES, null, null, null, null, null, null);
         mAdapter.changeCursor(cursor);
     }
 }

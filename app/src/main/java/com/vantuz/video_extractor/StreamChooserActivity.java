@@ -3,6 +3,7 @@ package com.vantuz.video_extractor;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,7 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
-import com.vantuz.video_extractor.db.HistoryDBSQLiteOpenHelper;
+import com.vantuz.video_extractor.db.MyDBSQLiteOpenHelper;
 import com.vantuz.video_extractor.extractor.CantExtractException;
 import com.vantuz.video_extractor.model.StreamEntry;
 import com.vantuz.video_extractor.model.ExceptionAndVideoInfo;
@@ -23,6 +24,9 @@ public class StreamChooserActivity extends Activity implements AdapterView.OnIte
     private StreamEntry[] streams;
     private String url;
     private StreamChooserActivityAsyncTask task;
+    public boolean isFavorite;
+    private AsyncTask favouriteChangingTask;
+    private ToggleButton toggleButton;
 
     @Override
     @SuppressWarnings("deprecation")
@@ -63,12 +67,26 @@ public class StreamChooserActivity extends Activity implements AdapterView.OnIte
             Spinner spinner = (Spinner) findViewById(R.id.quality_chooser);
             spinner.setAdapter(adapter);
             spinner.setOnItemSelectedListener(this);
+            toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+            toggleButton.setChecked(isFavorite);
+            toggleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    changeFavourite();
+                }
+            });
             ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.parse(streams[selectedItem].url), "video/*");
-                    startActivity(intent);
+                    try {
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Toast toast = Toast.makeText(
+                                StreamChooserActivity.this, R.string.no_compatible_apps,Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
                 }
             });
         }
@@ -126,10 +144,13 @@ public class StreamChooserActivity extends Activity implements AdapterView.OnIte
             } catch (Exception e) {
                 return new ExceptionAndVideoInfo(e, null);
             }
-            SQLiteDatabase db = HistoryDBSQLiteOpenHelper.getInstance(activity).getWritableDatabase();
+            SQLiteDatabase db = MyDBSQLiteOpenHelper.getInstance(activity).getWritableDatabase();
             ContentValues values = new ContentValues();
-            values.put(HistoryDBSQLiteOpenHelper.URL, params[0]);
-            db.insert(HistoryDBSQLiteOpenHelper.TABLE_HISTORY, null, values);
+            values.put(MyDBSQLiteOpenHelper.URL_HISTORY, params[0]);
+            db.insert(MyDBSQLiteOpenHelper.TABLE_HISTORY, null, values);
+            Cursor cursor = db.query(MyDBSQLiteOpenHelper.TABLE_FAVORITES, null,
+                    MyDBSQLiteOpenHelper.URL_FAVORITES + " = \"" + params[0] + "\"", null, null, null, null );
+            activity.isFavorite = cursor.getCount() == 1;
             return res;
         }
 
@@ -139,6 +160,40 @@ public class StreamChooserActivity extends Activity implements AdapterView.OnIte
             res = arg;
             activity.onPostExecute(arg);
         }
+    }
+
+    private void changeFavourite() {
+        Log.d(TAG,"change favourite");
+        if (favouriteChangingTask == null) {
+            favouriteChangingTask = new AsyncTask() {
+                @Override
+                protected Object doInBackground(Object[] params) {
+                    SQLiteDatabase db = MyDBSQLiteOpenHelper.getInstance(StreamChooserActivity.this)
+                            .getWritableDatabase();
+                    if (!isFavorite) {
+                        ContentValues values = new ContentValues();
+                        values.put(MyDBSQLiteOpenHelper.URL_FAVORITES, url);
+                        db.insert(MyDBSQLiteOpenHelper.TABLE_FAVORITES, null, values);
+                    } else {
+                        db.delete(MyDBSQLiteOpenHelper.TABLE_FAVORITES,
+                                MyDBSQLiteOpenHelper.URL_FAVORITES + " = \"" + url + "\"", null);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Object o) {
+                    favoriteChanged();
+                }
+            };
+            favouriteChangingTask.execute();
+        }
+    }
+
+    private void favoriteChanged() {
+        isFavorite = !isFavorite;
+        toggleButton.setChecked(isFavorite);
+        favouriteChangingTask = null;
     }
 
     private static final String TAG = "StreamChooserActivity";
