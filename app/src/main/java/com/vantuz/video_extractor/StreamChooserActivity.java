@@ -1,13 +1,16 @@
 package com.vantuz.video_extractor;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+import com.vantuz.video_extractor.db.HistoryDBSQLiteOpenHelper;
 import com.vantuz.video_extractor.extractor.CantExtractException;
 import com.vantuz.video_extractor.model.StreamEntry;
 import com.vantuz.video_extractor.model.ExceptionAndVideoInfo;
@@ -116,12 +119,18 @@ public class StreamChooserActivity extends Activity implements AdapterView.OnIte
         @Override
         protected ExceptionAndVideoInfo doInBackground(String... params) {
             Log.d(TAG, "task started");
+            ExceptionAndVideoInfo res;
             try {
-                return new ExceptionAndVideoInfo(null,
+                res = new ExceptionAndVideoInfo(null,
                         VideoPageURLProcessor.getVideoStreams(params[0]));
             } catch (Exception e) {
                 return new ExceptionAndVideoInfo(e, null);
             }
+            SQLiteDatabase db = HistoryDBSQLiteOpenHelper.getInstance(activity).getWritableDatabase();
+            ContentValues values = new ContentValues();
+            values.put(HistoryDBSQLiteOpenHelper.URL, params[0]);
+            db.insert(HistoryDBSQLiteOpenHelper.TABLE_HISTORY, null, values);
+            return res;
         }
 
         @Override
